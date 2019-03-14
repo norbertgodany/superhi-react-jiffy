@@ -3,6 +3,11 @@ import React, { Component } from 'react';
 import loader from './images/loader.svg'
 import close from './images/close-icon.svg'
 
+const randomChoice = arr => {
+  const randIndex = Math.floor(Math.random() * arr.length);
+  return arr[randIndex];
+};
+
 const Header = () => (
   <div className="header grid">
     <h1 className="title">
@@ -11,7 +16,7 @@ const Header = () => (
   </div>
 )
 
-const UserHint = ({loading, hintText}) => (
+const UserHint = ({ loading, hintText }) => (
   <div className="user-hint">
     {/* here we check whether we have a loading state and render out either our sponner or hintText
     using a tenary operator if else statement*/}
@@ -27,9 +32,39 @@ class App extends Component {
     // default states
     this.state = {
       searchTerm: '',
-      hintText: ''
+      hintText: '',
+      gif: null,
+      gifs: []
     }
   };
+
+  // requesting giphy api for data
+  searchGiphy = async searchTerm => {
+    try {
+      // here we use await to wait for the response to come back
+      const response = await fetch(`https://api.giphy.com/v1/gifs/search?api_key=bJ6ZQrR61ErHVtVkdLaljkc1t44oCXKM&q=${searchTerm}&limit=25&offset=0&rating=PG&lang=en`)
+
+      //converting raw response into json
+      // const {data} gets the .data part of our response
+      const { data } = await response.json()
+
+      // here we grab a random result from the images
+      const randomGif = randomChoice(data)
+
+      this.setState((prevState, props) => ({
+        ...prevState,
+        // ge the first result and put it in the state
+        gif: randomGif,
+        // here we use our spread to take the previous gifs and
+        // spread them out, and then add our new random gif
+        // onto the end
+        gifs: [...prevState.gifs, randomGif]
+      }))
+
+    } catch (error) {
+
+    }
+  }
 
   // with modern js we dont need constructor and bind for the this keyword, just for the state
   handleChange = event => {
@@ -49,25 +84,32 @@ class App extends Component {
   handleKeyPress = event => {
     const { value } = event.target
     if (value.length >= 3 && event.key === 'Enter') {
-      alert(`Search for ${value}`)
+      // we call our searchGiphy function with the searchTerm
+      this.searchGiphy(value)
     }
   }
 
   render() {
     // const searchTerm = this.state.searchTerm
-    const {searchTerm} = this.state
+    const { searchTerm, gif } = this.state
     return (
       <div className="page">
         <Header />
+
         <div className="search grid">
+
+          {this.state.gifs.map(gif => (<video className="grid-item video" autoPlay loop
+            src={gif.images.original.mp4} />
+          ))}
+
           <input className="input grid-item" placeholder="Search for a GIF"
             onChange={this.handleChange}
             onKeyPress={this.handleKeyPress}
-            value={searchTerm}>
-          </input>
+            value={searchTerm}
+          />
         </div>
         {/* here we pass UserHint all of our state using a spread*/}
-        <UserHint {...this.state}/>
+        <UserHint {...this.state} />
       </div>
     );
   }

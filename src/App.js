@@ -55,6 +55,14 @@ class App extends Component {
       //converting raw response into json
       // const {data} gets the .data part of our response
       const { data } = await response.json()
+      
+      // here we check if the array of results is empty
+      // if it is, we throw an error which will stop the code here
+      // and handle it in the catch area
+
+      if (!data.length === 0) {
+        throw `Nothing found for ${searchTerm}`
+      }
 
       // here we grab a random result from the images
       const randomGif = randomChoice(data)
@@ -68,11 +76,16 @@ class App extends Component {
         // onto the end
         gifs: [...prevState.gifs, randomGif],
         // we turn off our loading spinner again
-        loading: false
+        loading: false,
+        hintText: `Hit enter to search for more ${searchTerm}`
       }))
 
     } catch (error) {
-
+      this.setState((prevState, props) => ({
+        ...prevState,
+        hintText: error,
+        loading: false
+      }))
     }
   }
 

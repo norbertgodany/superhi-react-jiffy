@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Gif from './Gif'
 
 import loader from './images/loader.svg'
 import close from './images/close-icon.svg'
@@ -31,6 +32,7 @@ class App extends Component {
 
     // default states
     this.state = {
+      loading: false,
       searchTerm: '',
       hintText: '',
       gif: null,
@@ -40,6 +42,12 @@ class App extends Component {
 
   // requesting giphy api for data
   searchGiphy = async searchTerm => {
+
+    // we set our loading state to be true, to show the spinner
+    this.setState({
+      loading: true
+    })
+
     try {
       // here we use await to wait for the response to come back
       const response = await fetch(`https://api.giphy.com/v1/gifs/search?api_key=bJ6ZQrR61ErHVtVkdLaljkc1t44oCXKM&q=${searchTerm}&limit=25&offset=0&rating=PG&lang=en`)
@@ -58,7 +66,9 @@ class App extends Component {
         // here we use our spread to take the previous gifs and
         // spread them out, and then add our new random gif
         // onto the end
-        gifs: [...prevState.gifs, randomGif]
+        gifs: [...prevState.gifs, randomGif],
+        // we turn off our loading spinner again
+        loading: false
       }))
 
     } catch (error) {
@@ -98,8 +108,9 @@ class App extends Component {
 
         <div className="search grid">
 
-          {this.state.gifs.map(gif => (<video className="grid-item video" autoPlay loop
-            src={gif.images.original.mp4} />
+          {this.state.gifs.map(gif => (
+            // we spread all of our properties onto our Gif component
+            <Gif {...gif}/>
           ))}
 
           <input className="input grid-item" placeholder="Search for a GIF"

@@ -2,18 +2,22 @@ import React, { Component } from 'react';
 import Gif from './Gif'
 
 import loader from './images/loader.svg'
-import close from './images/close-icon.svg'
+import clearButton from './images/close-icon.svg'
 
 const randomChoice = arr => {
   const randIndex = Math.floor(Math.random() * arr.length);
   return arr[randIndex];
 };
 
-const Header = () => (
+// we pick out our props inside the header component 
+// we can pass down the functions props as well as things
+// like numbers, strings, arrays, or objects
+const Header = ({ clearSearch, hasResults }) => (
   <div className="header grid">
-    <h1 className="title">
-      Jiffy
-    </h1>
+    {hasResults ?
+      <button onClick={clearSearch}>
+        <img src={clearButton} />
+      </button> : <h1 className="title">Jiffy</h1>}
   </div>
 )
 
@@ -25,6 +29,8 @@ const UserHint = ({ loading, hintText }) => (
   </div>
 )
 
+// reset the state by clearing everything out
+
 class App extends Component {
 
   constructor(props) {
@@ -35,12 +41,11 @@ class App extends Component {
       loading: false,
       searchTerm: '',
       hintText: '',
-      gif: null,
       gifs: []
     }
   };
 
-  // requesting giphy api for data
+  // requesting giphy api for data, async
   searchGiphy = async searchTerm => {
 
     // we set our loading state to be true, to show the spinner
@@ -55,12 +60,12 @@ class App extends Component {
       //converting raw response into json
       // const {data} gets the .data part of our response
       const { data } = await response.json()
-      
+
       // here we check if the array of results is empty
       // if it is, we throw an error which will stop the code here
       // and handle it in the catch area
 
-      if (!data.length === 0) {
+      if (!data.length) {
         throw `Nothing found for ${searchTerm}`
       }
 
@@ -70,7 +75,6 @@ class App extends Component {
       this.setState((prevState, props) => ({
         ...prevState,
         // ge the first result and put it in the state
-        gif: randomGif,
         // here we use our spread to take the previous gifs and
         // spread them out, and then add our new random gif
         // onto the end
@@ -86,8 +90,9 @@ class App extends Component {
         hintText: error,
         loading: false
       }))
+      console.log(error)
     }
-  }
+  };
 
   // with modern js we dont need constructor and bind for the this keyword, just for the state
   handleChange = event => {
@@ -112,18 +117,31 @@ class App extends Component {
     }
   }
 
+  // here we reset our states and make everything default again
+
+  claerSearch = () => {
+    this.setState((prevState, props) => ({
+      ...prevState,
+      searchTerm: "",
+      hintText: "",
+      gifs: []
+    }));
+  };
+
   render() {
     // const searchTerm = this.state.searchTerm
-    const { searchTerm, gif } = this.state
+    const { searchTerm, gifs } = this.state
+    // here we set a variable to see if we have any gifs
+    const hasResults = gifs.length
     return (
       <div className="page">
-        <Header />
+        <Header claerSearch={this.claerSearch} hasResults={hasResults} />
 
         <div className="search grid">
 
           {this.state.gifs.map(gif => (
             // we spread all of our properties onto our Gif component
-            <Gif {...gif}/>
+            <Gif {...gif} />
           ))}
 
           <input className="input grid-item" placeholder="Search for a GIF"

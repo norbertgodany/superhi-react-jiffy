@@ -10,7 +10,7 @@ const randomChoice = arr => {
 };
 
 // we pick out our props inside the header component 
-// we can pass down the functions props as well as things
+// we can pass down the functions as props as well as things
 // like numbers, strings, arrays, or objects
 const Header = ({ clearSearch, hasResults }) => (
   <div className="header grid">
@@ -119,14 +119,16 @@ class App extends Component {
 
   // here we reset our states and make everything default again
 
-  claerSearch = () => {
+  clearSearch = () => {
     this.setState((prevState, props) => ({
       ...prevState,
-      searchTerm: "",
-      hintText: "",
+      searchTerm: '',
+      hintText: '',
       gifs: []
-    }));
-  };
+    }))
+    // here we grab the input and focus the cursor back into it
+    this.textInput.focus();
+  }
 
   render() {
     // const searchTerm = this.state.searchTerm
@@ -135,7 +137,7 @@ class App extends Component {
     const hasResults = gifs.length
     return (
       <div className="page">
-        <Header claerSearch={this.claerSearch} hasResults={hasResults} />
+        <Header clearSearch={this.clearSearch} hasResults={hasResults} />
 
         <div className="search grid">
 
@@ -148,6 +150,9 @@ class App extends Component {
             onChange={this.handleChange}
             onKeyPress={this.handleKeyPress}
             value={searchTerm}
+            ref={(input) => {
+              this.textInput = input;
+              }}
           />
         </div>
         {/* here we pass UserHint all of our state using a spread*/}
